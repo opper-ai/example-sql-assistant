@@ -128,11 +128,10 @@ def suggest_question(conversation: str, db_structure: str) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Database Query Assistant")
     parser.add_argument("-d", "--database", default="data/chinook.db", help="Path to the SQLite database file (default: data/chinook.db)")
-    parser.add_argument("-v", "--verbose", action="store_true", default=True, help="Show SQL query and detailed results")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Show SQL query and detailed results")
     args = parser.parse_args()
 
     db_manager = DatabaseManager(args.database)
-    db_structure = db_manager.get_db_structure()
 
     print("\nWelcome to the Database Query Assistant.")
     print("Type 'describe' to get a description of the database.")
@@ -140,12 +139,14 @@ def main():
     print("Type 'suggest' if you feel lucky.")
     print("Type 'exit' to quit.")
 
-
     conversation = ""
     
     with opper.traces.start("session") as span_session:
 
+        db_structure = db_manager.get_db_structure()
+
         while True:
+
             user_question = input("\nQuestion: ")
 
             if not conversation:
@@ -156,7 +157,7 @@ def main():
             
             elif user_question.lower() == 'describe':
                 db_description, response = describe_database(db_structure)
-                print("\nDatabase Description: ", db_description, "\n")
+                print("\nAssistant:", db_description)
                 continue
             
             elif user_question.lower() == 'rate':
@@ -206,10 +207,12 @@ def main():
                     
                     # Reflect and repeat if not successful
                     if not reflection.success:
-                        print(f"{debug_text_color}Reflection: {reflection}{color_reset}")
+                        if args.verbose:
+                            print(f"{debug_text_color}Reflection: {reflection}{color_reset}")
                         runtime_feedback = reflection.thoughts                    
                     else:
-                        print(f"{debug_text_color}Reflection: Success{color_reset}")
+                        if args.verbose:
+                            print(f"{debug_text_color}Reflection: Success{color_reset}")
                         break
                 else:
                     print("Assistant: Failed to generate a valid query after 3 attempts. Please rephrase your question.")
@@ -217,7 +220,7 @@ def main():
 
                 # Create response
                 result, obj = create_response(conversation, db_structure, query_result)
-                print("\nAssistant: ", result)
+                print("\nAssistant:", result)
 
                 conversation += f"Response: {result}\n\n"
 
