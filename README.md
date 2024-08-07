@@ -1,16 +1,18 @@
 # Database Query Assistant
 
-This project is a simple SQLite database query assistant that uses Opper to generate SQL queries and create responses. It's designed to be an easy-to-understand example for beginners learning about database interactions and AI-assisted query generation.
+This project is a simple general purpose SQLite database query assistant that uses Opper to generate SQL queries and create responses. It's designed to be an easy-to-understand example for beginners learning about building end to end LLM based features that includes calling models with structured prompting,
+implementing reflection, chain of thought reasoning, feedback collection and tracing to facilitate human in the loop.
+
+Sign up for Opper at https://opper.ai/
 
 ## Features
 
-- Interactive command-line interface
-- Automatic SQL query generation based on natural language input
-- Database structure introspection
-- Query execution and result presentation
-- Suggestion of follow-up questions
-- User feedback collection
-- Tracing of calls an sessions
+- Conversational query interface (LLM)
+- Automatic SQL query generation with CoT and Structured Prompting (LLM)
+- Query execution and result presentation (LLM)
+- Suggestion of follow-up questions (LLM)
+- User feedback collection and Metrics
+- Tracing of Session, LLM calls and other Operations
   
 ## Installation
 
