@@ -7,6 +7,7 @@ Sign up for Opper at https://opper.ai/
 
 ## Features
 
+- Supports any SQLlite database (bundled with "chinook.db")
 - Conversational query interface (LLM)
 - Automatic SQL query generation with CoT and Structured Prompting (LLM)
 - Query execution and result presentation (LLM)

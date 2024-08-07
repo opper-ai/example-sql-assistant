@@ -1,9 +1,11 @@
-from opperai import Opper, fn, trace
+from opperai import Opper, trace
+from opperai.types import CacheConfiguration
 import sqlite3
 import argparse
 from typing import List, Tuple
 from pydantic import BaseModel
 from typing import Literal
+import readline
 
 opper = Opper()
 
@@ -65,6 +67,16 @@ class Reflection(BaseModel):
     thoughts: str
     success: bool
 
+def describe_database(db_structure: str) -> str:
+    return opper.call(
+        "describe_database",
+        instructions="Given a database structure, provide a simple overview of what the database is about",
+        input={
+            "db_structure": db_structure,
+        },
+        output_type=str
+    )
+
 def generate_sql_query(conversation: str, db_structure: str, comment: str = "None") -> Query:
     return opper.call(
         "generate_sql_query",
@@ -74,7 +86,7 @@ def generate_sql_query(conversation: str, db_structure: str, comment: str = "Non
             "db_structure": db_structure,
             "comment": comment
         },
-        output_type=Query
+        output_type=Query,
     )
 
 def create_response(conversation: str, db_structure: str, query_result: str) -> str:
@@ -123,21 +135,29 @@ def main():
     db_structure = db_manager.get_db_structure()
 
     print("\nWelcome to the Database Query Assistant.")
-    print("Type 'exit' to quit.")
+    print("Type 'describe' to get a description of the database.")
     print("Type 'rate' to rate the last response.")
     print("Type 'suggest' if you feel lucky.")
-    
+    print("Type 'exit' to quit.")
+
+
     conversation = ""
     
     with opper.traces.start("session") as span_session:
+
         while True:
-            user_question = input("\nYou: ")
+            user_question = input("\nQuestion: ")
 
             if not conversation:
                 span_session.update(input=user_question)
             
             if user_question.lower() == 'exit':
                 break
+            
+            elif user_question.lower() == 'describe':
+                db_description, response = describe_database(db_structure)
+                print("\nDatabase Description: ", db_description, "\n")
+                continue
             
             elif user_question.lower() == 'rate':
                 rating = input("How was the response? (1-5): ")
@@ -189,10 +209,11 @@ def main():
                         print(f"{debug_text_color}Reflection: {reflection}{color_reset}")
                         runtime_feedback = reflection.thoughts                    
                     else:
+                        print(f"{debug_text_color}Reflection: Success{color_reset}")
                         break
                 else:
                     print("Assistant: Failed to generate a valid query after 3 attempts. Please rephrase your question.")
-                    break
+                    continue
 
                 # Create response
                 result, obj = create_response(conversation, db_structure, query_result)
